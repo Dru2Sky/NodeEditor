@@ -1,0 +1,46 @@
+cmake_minimum_required(VERSION 3.20)
+
+project(NodeEditor LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(QT_PATH "C:/Qt/5.15.2/msvc2019_64")
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH};${QT_PATH})
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
+
+
+
+find_package(Qt5 REQUIRED COMPONENTS 
+    Core 
+    Gui 
+    Widgets
+
+)
+
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
+set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
+set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
+set(FORMS_DIR ${CMAKE_SOURCE_DIR}/forms)
+set(RESOURCES_DIR ${CMAKE_SOURCE_DIR}/resources)
+
+file(GLOB_RECURSE SRC CMAKE_CONFIGURE_DEPENDS ${SRC_DIR}/*.cpp ${SRC_DIR}/*.h)
+file(GLOB_RECURSE HEADERS CMAKE_CONFIGURE_DEPENDS ${INCLUDE_DIR}/*.h)
+file(GLOB_RECURSE FORMS CMAKE_CONFIGURE_DEPENDS ${FORMS_DIR}/*.ui)
+file(GLOB_RECURSE RESOURCES CMAKE_CONFIGURE_DEPENDS ${RESOURCES_DIR}/*.qrc)
+
+
+add_executable(${PROJECT_NAME} ${SRC} ${HEADERS} ${FORMS} ${RESOURCES})
+
+target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets)
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIR})
+#使用windeployqt.exe将需要的库生成到exe文件所在目录下
+set(DEPLOYQT_EXE ${QT_PATH}/bin/windeployqt.exe)
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${DEPLOYQT_EXE} $<TARGET_FILE:${PROJECT_NAME}>
+    COMMENT "Deploying Qt libraries"
+)
